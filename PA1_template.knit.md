@@ -5,29 +5,19 @@ keep_md: TRUE
 ---
 
 This is an R Markdown document for Project 1 of the Reproducible Research Course. 
-```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figures/',
-                      echo=FALSE, warning=FALSE, message=FALSE)
-```
+
 
 ###Loading and preprocessing the data
 
-```{r}
-setwd("/Users/Josephine/Documents/PAHO_Drive/Coursera/Reproduce/Project1/RepData_PeerAssessment1")
-mydata<-read.csv("activity.csv")
-library(data.table)
-library(plyr)
-library("timeDate")
-library ("knitr")
-library("rmarkdown")
-```
+
 
 ###What is mean total number of steps taken per day? 
 For this analysis, missing values are ignored.
 
 ####Histogram of the total number of steps taken each day
 
-```{r, echo=TRUE}
+
+```r
 stepsum<-data.table(aggregate(mydata$steps, 
                     by=list(Category=mydata$date), 
                     FUN=sum, 
@@ -41,22 +31,26 @@ hist(stepsum$x,
      breaks=20)
 ```
 
+<img src="Figures/unnamed-chunk-2-1.png" width="1152" />
+
 ###Calculate the mean and median total number of steps taken per day. 
         Missing Values are ignored.
         
-```{r, echo=TRUE}
+
+```r
 meanstep<-round(mean(stepsum$x, na.rm=TRUE),2)
 medstep<-median(stepsum$x, na.rm=TRUE)
 ```
 
 The mean and median total number of steps taken per day, respectively, are:
 
-#####`r meanstep` and `r medstep`
+#####9354.23 and 10395
 
 
 ###What is the average daily activity pattern?
 
-```{r, echo=TRUE}
+
+```r
 intervalmean<-data.table(aggregate(mydata$steps, 
                     by=list(Category=mydata$interval), 
                     FUN=mean, 
@@ -69,46 +63,48 @@ plot(intervalmean$Category,
      ylab= "Average Number of Steps", 
      col="green", 
      lwd=2)
-
 ```
+
+<img src="Figures/unnamed-chunk-4-1.png" width="1152" />
 
 
 ###Which 5-minute interval, on average across all the days in the dataset, 
 ###contains the maximum number of steps?
 
-```{r, echo=TRUE}
+
+```r
 maxstep<-max(intervalmean$x)
 maxint<-intervalmean$Category[intervalmean$x==maxstep]
 maxstep<-round(maxstep,2)
 ```
-On average, the interval `r maxint` has the highest number of steps (`r maxstep` steps).
+On average, the interval 835 has the highest number of steps (206.17 steps).
 
 ###Imputing missing values
 
 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
 
-```{r, echo=TRUE}
+
+```r
 missingsteps<-sum(is.na(mydata$steps))
 ```
 
-There are `r missingsteps` rows of data missing values for the variable STEPS. 
+There are 2304 rows of data missing values for the variable STEPS. 
 
 ###Fill in all missing values in the dataset 
 The mean for the 5-minute interval to which the missing value pertains was used
 to impute a value for all NAs.
 
-```{r, echo=TRUE}
 
-
+```r
 impute.mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
 mydata2 <- ddply(mydata, ~ interval, transform, steps = impute.mean(steps))
-
 ```
 
 ###Make a histogram of the total number of steps taken each day
 
-```{r, echo=TRUE}
+
+```r
 stepsum2<-data.table(aggregate(mydata2$steps, 
                     by=list(Category=mydata2$date), 
                     FUN=sum, 
@@ -122,27 +118,27 @@ hist(stepsum2$x,
      breaks=20)
 ```
 
+<img src="Figures/unnamed-chunk-8-1.png" width="1152" />
+
 ###Calculate and report the mean and median total number of steps taken per day. 
 Do these values differ from the estimates from the first part of the assignment? 
 What is the impact of imputing missing data on the estimates of the total 
 daily number of steps?
 
-```{r}
-meanstep2<-round(mean(stepsum$x, na.rm=TRUE), 2)
-medstep2<-median(stepsum$x, na.rm=TRUE)
-```
+
 
 Before removing the NA values, the mean and median number of steps per day was
-`r meanstep` and `r medstep`, respectively. After imputing values for the NA's,
-using the mean for the given interval, the new values were `r meanstep2` 
-and `r medstep`, respectively. Removing the NAs increased the mean and median 
+9354.23 and 10395, respectively. After imputing values for the NA's,
+using the mean for the given interval, the new values were 9354.23 
+and 10395, respectively. Removing the NAs increased the mean and median 
 values of the total daily number of steps.
 
 ###Are there differences in activity patterns between weekdays and weekends?
 
 Create a new factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r, echo=TRUE}
+
+```r
 mydata2$Weekday<-isWeekday(mydata2$date, wday=1:5)
 mydata2$Weekday[mydata2$Weekday=="FALSE"]<-"weekend"
 mydata2$Weekday[mydata2$Weekday=="TRUE"]<-"weekday"
@@ -152,32 +148,11 @@ intervalmean2<-data.table(aggregate(mydata2$steps,
                     FUN=mean, 
                     na.rm=TRUE))
 colnames(intervalmean2) <- c("Interval","Weekday","Steps")
-
-
 ```
 
 ###Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). 
 
-```{r}
-par(mfrow=c(2,1)) 
-plot(intervalmean2$Interval[intervalmean2$Weekday=="weekday"],
-     intervalmean2$Steps [intervalmean2$Weekday=="weekday"],
-     type="l", 
-     ylab= "Average Number of Steps", 
-     xlab="",
-     main="Weekday",
-     col="green", 
-     lwd=2)
-plot(intervalmean2$Interval[intervalmean2$Weekday=="weekend"],
-     intervalmean2$Steps [intervalmean2$Weekday=="weekend"],
-     type="l", 
-     xlab= "5-minute time intervals", 
-     ylab= "Average Number of Steps", 
-     main="Weekend",
-     col="green", 
-     lwd=2)
+<img src="Figures/unnamed-chunk-11-1.png" width="1152" />
 
-```
-
-rmarkdown::render("PA1_template.Rmd", clean=FALSE, fig.path='Figures/')
+rmarkdown::render("PA1_template.Rmd", clean=FALSE)
 
